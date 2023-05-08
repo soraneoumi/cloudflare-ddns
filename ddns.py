@@ -19,7 +19,7 @@ headers = {
 
 def get_ipv6_address():
     # Get the public IPv6 address
-    ipv6_address = os.popen("ip -6 addr show eth0 | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^fe80' | sed -n 2p").read().strip()
+    ipv6_address = os.popen("ip -6 addr show eth0 | grep 'mngtmpaddr' | grep -oP '(?<=inet6\s)[\da-f:]+'").read().strip()
     return ipv6_address
 
 def get_zone_id():
