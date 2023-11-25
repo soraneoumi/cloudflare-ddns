@@ -1,6 +1,5 @@
 import requests
 import json
-import re
 import os
 
 # Fill with your CF account details 
@@ -33,8 +32,19 @@ def get_record_id(zone_id):
     url = f'https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records?name={RECORD_NAME}'
     response = requests.get(url, headers=headers)
     data = json.loads(response.text)
-    record_id = data['result'][0]['id']
-    return record_id
+    records = data['result']
+    return records[0]['id'] if records else None
+
+def create_record(zone_id, ipv6_address):
+    url = f'https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records'
+    data = {
+        'type': 'AAAA',
+        'name': RECORD_NAME,
+        'content': ipv6_address,
+        'ttl': 120
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    return json.loads(response.text)['success']
 
 def update_record(zone_id, record_id, ipv6_address):
     url = f'https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_id}'
@@ -45,16 +55,19 @@ def update_record(zone_id, record_id, ipv6_address):
         'ttl': 120
     }
     response = requests.put(url, headers=headers, data=json.dumps(data))
-    data = json.loads(response.text)
-    success = data['success']
-    return success
+    return json.loads(response.text)['success']
 
 ipv6_address = get_ipv6_address()
 zone_id = get_zone_id()
 record_id = get_record_id(zone_id)
-success = update_record(zone_id, record_id, ipv6_address)
+
+if record_id:
+    success = update_record(zone_id, record_id, ipv6_address)
+else:
+    success = create_record(zone_id, ipv6_address)
 
 if success:
-    print(f'Successfully updated {RECORD_NAME} to {ipv6_address}')
+    action = "updated" if record_id else "created"
+    print(f'Successfully {action} {RECORD_NAME} with {ipv6_address}')
 else:
-    print('Failed to update record')
+    print('Failed to update or create record')
