@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import subprocess
 
 # Fill with your CF account details 
 CF_API_KEY = '0000000000000000000000'
@@ -18,7 +19,10 @@ headers = {
 
 def get_ipv6_address():
     # Get the public IPv6 address
-    ipv6_address = os.popen("ip -6 addr show eth0 | grep 'mngtmpaddr' | grep -oP '(?<=inet6\s)[\da-f:]+'").read().strip()
+    default_iface = os.popen("ip -6 route | grep default | awk '{print $5}'").read().strip()
+    if not default_iface:
+        return None  # No default interface found
+    ipv6_address = os.popen(f"ip -6 addr show {default_iface} | grep 'mngtmpaddr' | grep -oP '(?<=inet6\s)[\da-f:]+'").read().strip()
     return ipv6_address
 
 def get_zone_id():
