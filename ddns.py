@@ -4,16 +4,14 @@ import os
 import subprocess
 
 # Fill with your CF account details 
-CF_API_KEY = '0000000000000000000000'
-CF_EMAIL = '0000000000000000000000'
+CF_API_TOKEN = '0000000000000000000000'
 
 # Fill with your domain details
 DOMAIN = 'example.com'
 RECORD_NAME = 'sub.example.com'
 
 headers = {
-    'X-Auth-Email': CF_EMAIL,
-    'X-Auth-Key': CF_API_KEY,
+    'Authorization': 'Bearer ' + CF_API_TOKEN,
     'Content-Type': 'application/json'
 }
 
